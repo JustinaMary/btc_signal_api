@@ -6,7 +6,7 @@ import requests
 import json
 from datetime import datetime
 import math
-
+import logging
 
 # ------------ Constants ------------
 const_symbol = 'btcusdt'
@@ -21,7 +21,8 @@ funding_rate_url = 'https://fapi.binance.com/fapi/v1/fundingRate'
 
 # Candles
 candle_url = 'https://fapi.binance.com/fapi/v1/klines'
-
+logging.basicConfig(level=logging.INFO)  # Set the logging level to INFO (or other desired level)
+logger = logging.getLogger(__name__)  # Create a logger for your specific module or script
 
 # ------------ Funding Rates ------------
 def get_funding_rate(symbol, limit):
@@ -48,9 +49,9 @@ def get_funding_data(symbol, limit):
     # data
     funding_list = []
     funding = get_funding_rate(symbol=symbol, limit=limit)
-
+    logger.info("This funding", funding)
     for x in funding:
-        print('Testing X', x)
+
         time = x['fundingTime']
         funding = float(x['fundingRate'])
         symbol = x['symbol']
