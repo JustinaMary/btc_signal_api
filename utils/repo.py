@@ -38,7 +38,7 @@ def get_funding_rate(symbol, limit):
 
     # send the request
     response = requests.get(url, params=payload)
-
+    logger.info("Funding rate response", response)
     # return the response
     return json.loads(response.text)
 
@@ -51,7 +51,6 @@ def get_funding_data(symbol, limit):
     funding = get_funding_rate(symbol=symbol, limit=limit)
     logger.info("This funding", funding)
     for x in funding:
-
         time = x['fundingTime']
         funding = float(x['fundingRate'])
         symbol = x['symbol']
