@@ -50,7 +50,7 @@ def get_funding_data(symbol, limit):
     funding = get_funding_rate(symbol=symbol, limit=limit)
 
     for x in funding:
-
+        print('Testing X', x)
         time = x['fundingTime']
         funding = float(x['fundingRate'])
         symbol = x['symbol']
