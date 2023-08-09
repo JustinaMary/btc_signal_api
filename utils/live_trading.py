@@ -17,7 +17,7 @@ buy_size = []
 sell_volume = []
 sell_size = []
 
-def luke(equity):
+def luke():
 
     #while True:
         # ------------ Funding Data ------------
@@ -48,22 +48,25 @@ def luke(equity):
         long_candle_mean = statistics.mean(long_candle_close)
         #await asyncio.sleep(0.2)
         epoch.sleep(0.2)
-
+        signal_value = ''
+        
         # ------------ Signals ------------
 
         if current_rate < funding_lower_bb and current_close < candle_lower_bb:
             print('buy signal')
-            order_size_usd = ((equity * candle_mean / current_close) - equity) * 1.2
-            order_size_base = order_size_usd / current_close
+            signal_value = 'buy'
+            #order_size_usd = ((equity * candle_mean / current_close) - equity) * 1.2
+            #order_size_base = order_size_usd / current_close
 
         elif current_rate > funding_upper_bb and current_close > candle_upper_bb and current_close > long_candle_mean:
             print('sell signal')
-            order_size_usd = ((equity * candle_mean / current_close) - equity)
-            order_size_base = order_size_usd / current_close
+            signal_value = 'sell'
+            #order_size_usd = ((equity * candle_mean / current_close) - equity)
+            #order_size_base = order_size_usd / current_close
 
         else:
             print('waiting for next signal. previous signals: ')
-
+            signal_value = 'waiting for next'
             # remaining time until next signal
             now_epoch = int(epoch.time())
             next_signal_time = ((candles_reverse[0]['close_time'] / 1000) - now_epoch)
@@ -114,14 +117,14 @@ def luke(equity):
                 time = row['hr_open_time']
 
                 close = row['close']
-                order_size_usd = ((equity * (row['mid_bb'] / close)) - equity) * 1.2
-                order_size_base = order_size_usd / close
+                #order_size_usd = ((equity * (row['mid_bb'] / close)) - equity) * 1.2
+                #order_size_base = order_size_usd / close
 
-                buy_volume.append(order_size_usd)
-                buy_size.append(order_size_base)
-                average_entry = sum(buy_volume) / sum(buy_size)
+                # buy_volume.append(order_size_usd)
+                # buy_size.append(order_size_base)
+                # average_entry = sum(buy_volume) / sum(buy_size)
 
-                print(f'time: {time}, price: {close}, order size: {order_size_usd}, average entry: {average_entry}')
+                #print(f'time: {time}, price: {close}, order size: {order_size_usd}, average entry: {average_entry}')
 
             # sell signal
             filtered_sell_signal_funding = funding_df[sell_signal]
@@ -132,45 +135,51 @@ def luke(equity):
                 time = row['hr_open_time']
 
                 close = row['close']
-                order_size_usd = ((equity * (close / row['mid_bb'])) - equity)
-                order_size_base = order_size_usd / close
+                #order_size_usd = ((equity * (close / row['mid_bb'])) - equity)
+                #order_size_base = order_size_usd / close
 
-                sell_volume.append(order_size_usd)
-                sell_size.append(order_size_base)
-                average_exit = sum(sell_volume) / sum(sell_size)
+                # sell_volume.append(order_size_usd)
+                # sell_size.append(order_size_base)
+                # average_exit = sum(sell_volume) / sum(sell_size)
 
-                print(f'time: {time}, price: {close}, order size: {order_size_usd}, average entry: {average_exit}')
+                #print(f'time: {time}, price: {close}, order size: {order_size_usd}, average entry: {average_exit}')
 
             print('\ncurrent position: ')
 
-            position_size = sum(buy_volume) - sum(sell_volume)
-            average_entry = sum(buy_volume) / sum(buy_size)
-            average_exit = sum(sell_volume) / sum(sell_size)
+            #position_size = sum(buy_volume) - sum(sell_volume)
+            #average_entry = sum(buy_volume) / sum(buy_size)
+            #average_exit = sum(sell_volume) / sum(sell_size)
             price = ohlc_df.iloc[-1]['close']
-            sum_open = sum(buy_size) * price
-            sum_exit = sum(sell_size) * price
-            realized_profit = ((average_exit / average_entry) * sum_exit) - sum_exit
-            unrealized_profit = ((price / average_entry) * position_size) - position_size
-            message = ''
-            remaining_time = ''
-            if price > average_entry:
-                 message = (f'Congratulations. You are in ${round(realized_profit + unrealized_profit, 2)} of profits. Or %{round((((equity + realized_profit + unrealized_profit) / equity) - 1) * 100, 2)} returns.')
-                 remaining_time = (f'{round(next_signal_time / 3600)}h remaining until next potential signal.')
-            else:
-                 remaining_time = (f'{round(next_signal_time / 3600)}h remaining until next potential signal.')  
+            #sum_open = sum(buy_size) * price
+            #sum_exit = sum(sell_size) * price
+            # realized_profit = ((average_exit / average_entry) * sum_exit) - sum_exit
+            # unrealized_profit = ((price / average_entry) * position_size) - position_size
+            # message = ''
+            # remaining_time = ''
+            # if price > average_entry:
+            #      message = (f'Congratulations. You are in ${round(realized_profit + unrealized_profit, 2)} of profits. Or %{round((((equity + realized_profit + unrealized_profit) / equity) - 1) * 100, 2)} returns.')
+            #      remaining_time = (f'{round(next_signal_time / 3600)}h remaining until next potential signal.')
+            # else:
+            #      remaining_time = (f'{round(next_signal_time / 3600)}h remaining until next potential signal.')  
+            # position_dict = {
+            #     'starting_equity': equity,
+            #     'symbol': repo.const_symbol,
+            #     'price': price,
+            #     'average_entry': round(average_entry, 2),
+            #     'average_exit': round(average_exit, 2),
+            #     'position_size': round(position_size, 2),
+            #     'realized_pnl': round(realized_profit, 2),
+            #     'unrealized_pnl': round(unrealized_profit, 2),
+            #     'total_pnl': round(realized_profit + unrealized_profit, 2),
+            #     'current_equity': round(equity + realized_profit + unrealized_profit, 2),
+            #     'percent_returns': round((((equity + realized_profit + unrealized_profit) / equity) - 1) * 100, 2),
+            #     'message' : message,
+            #     'remaining_time': remaining_time
+            # }
+            remaining_time = round(next_signal_time / 3600)
             position_dict = {
-                'starting_equity': equity,
-                'symbol': repo.const_symbol,
                 'price': price,
-                'average_entry': round(average_entry, 2),
-                'average_exit': round(average_exit, 2),
-                'position_size': round(position_size, 2),
-                'realized_pnl': round(realized_profit, 2),
-                'unrealized_pnl': round(unrealized_profit, 2),
-                'total_pnl': round(realized_profit + unrealized_profit, 2),
-                'current_equity': round(equity + realized_profit + unrealized_profit, 2),
-                'percent_returns': round((((equity + realized_profit + unrealized_profit) / equity) - 1) * 100, 2),
-                'message' : message,
+                'signal': signal_value,
                 'remaining_time': remaining_time
             }
 
